@@ -1,6 +1,8 @@
 using EventSourcing.Endpoints;
 using EventSourcing.Persistence;
+using Marten;
 using Microsoft.EntityFrameworkCore;
+using Weasel.Core;
 
 namespace EventSourcing;
 
@@ -16,7 +18,20 @@ public static class Program
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
-            services.AddDbContext<AppDbContext>(options => options.UseNpgsql(configuration.GetConnectionString("Default")));
+            var connectionString = configuration.GetConnectionString("Default")!;
+
+            services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+
+            services.AddMarten((options) =>
+            {
+                options.Connection(connectionString);
+
+                // If we're running in development mode, let Marten just take care of all necessary schema building and patching behind the scenes
+                if (builder.Environment.IsDevelopment())
+                {
+                    options.AutoCreateSchemaObjects = AutoCreate.All;
+                }
+            });
         }
 
         var app = builder.Build();
