@@ -10,8 +10,11 @@ public sealed class StartInstanceEndpoint
     public static IResult Handle(
         [FromServices] AppDbContext dbContext,
         [FromServices] IDocumentStore documentStore,
+        [FromServices] TenantContextProvider tenantContextProvider,
         CancellationToken ct)
     {
+        var tenant = tenantContextProvider.Current;
+
         var instance = new InstanceEntity()
         {
             EventStreamId = Guid.NewGuid()
@@ -22,6 +25,7 @@ public sealed class StartInstanceEndpoint
         dbContext.Add(instance);
         dbContext.SaveChanges();
 
+        // TODO: create a session on database specified by tenant.Database
         using (var session = documentStore.LightweightSession())
         {
             var instanceEvent = new InstanceStartedEvent()

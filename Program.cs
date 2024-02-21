@@ -1,7 +1,7 @@
 using EventSourcing.Endpoints;
 using EventSourcing.Persistence;
 using Marten;
-using Marten.Events.Projections;
+using Marten.Storage;
 using Microsoft.EntityFrameworkCore;
 using Weasel.Core;
 
@@ -19,6 +19,8 @@ public static class Program
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
+            services.AddScoped<TenantContextProvider>();
+
             var connectionString = configuration.GetConnectionString("Default")!;
 
             services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
@@ -32,6 +34,9 @@ public static class Program
                 {
                     options.AutoCreateSchemaObjects = AutoCreate.All;
                 }
+
+                // TODO: is this correct configuration?
+                options.Events.TenancyStyle = TenancyStyle.Conjoined;
             });
         }
 

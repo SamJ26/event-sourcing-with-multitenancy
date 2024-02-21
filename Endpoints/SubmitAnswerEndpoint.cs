@@ -12,9 +12,12 @@ public sealed class SubmitAnswerEndpoint
         [FromBody] SubmitAnswerRequest req,
         [FromServices] AppDbContext dbContext,
         [FromServices] IDocumentStore documentStore,
+        [FromServices] TenantContextProvider tenantContextProvider,
         [FromServices] ILogger<SubmitAnswerEndpoint> logger,
         CancellationToken ct)
     {
+        var tenant = tenantContextProvider.Current;
+        
         var instance = dbContext
             .Instances
             .Find(instanceId);
@@ -24,6 +27,7 @@ public sealed class SubmitAnswerEndpoint
             throw new Exception($"Instance with id '{instanceId}' does not exist!");
         }
 
+        // TODO: create a session on database specified by tenant.Database
         using (var session = documentStore.LightweightSession())
         {
             var instanceAggregate = session

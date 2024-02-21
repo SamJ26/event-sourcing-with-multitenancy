@@ -11,9 +11,12 @@ public sealed class TerminateInstanceEndpoint
         [FromRoute] int instanceId,
         [FromServices] AppDbContext dbContext,
         [FromServices] IDocumentStore documentStore,
+        [FromServices] TenantContextProvider tenantContextProvider,
         [FromServices] ILogger<TerminateInstanceEndpoint> logger,
         CancellationToken ct)
     {
+        var tenant = tenantContextProvider.Current;
+
         var instance = dbContext
             .Instances
             .Find(instanceId);
@@ -23,6 +26,7 @@ public sealed class TerminateInstanceEndpoint
             throw new Exception($"Instance with id '{instanceId}' does not exist!");
         }
 
+        // TODO: create a session on database specified by tenant.Database
         using (var session = documentStore.LightweightSession())
         {
             var instanceAggregate = session
