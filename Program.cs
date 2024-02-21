@@ -1,6 +1,7 @@
 using EventSourcing.Endpoints;
 using EventSourcing.Persistence;
 using Marten;
+using Marten.Events.Projections;
 using Microsoft.EntityFrameworkCore;
 using Weasel.Core;
 

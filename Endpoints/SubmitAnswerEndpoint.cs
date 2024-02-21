@@ -9,8 +9,10 @@ public sealed class SubmitAnswerEndpoint
 {
     public static IResult Handle(
         [FromRoute] int instanceId,
+        [FromBody] SubmitAnswerRequest req,
         [FromServices] AppDbContext dbContext,
         [FromServices] IDocumentStore documentStore,
+        [FromServices] ILogger<SubmitAnswerEndpoint> logger,
         CancellationToken ct)
     {
         var instance = dbContext
@@ -24,10 +26,21 @@ public sealed class SubmitAnswerEndpoint
 
         using (var session = documentStore.LightweightSession())
         {
+            var instanceAggregate = session
+                .Events
+                .AggregateStream<InstanceAggregate>(instance.EventStreamId)!;
+
+            logger.LogInformation("Instance state: {Aggregate}", instanceAggregate);
+
+            if (instanceAggregate.IsTerminated)
+            {
+                throw new Exception($"Instance with id '{instanceId}' was terminated!");
+            }
+
             var instanceEvent = new AnswerSubmittedEvent()
             {
                 InstanceId = instanceId,
-                Text = "Random text"
+                Text = req.Text
             };
 
             session.Events.Append(instance.EventStreamId, instanceEvent);
@@ -37,3 +50,5 @@ public sealed class SubmitAnswerEndpoint
         return Results.Ok();
     }
 }
+
+public record SubmitAnswerRequest(string Text);
