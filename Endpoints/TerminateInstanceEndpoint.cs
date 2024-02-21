@@ -11,6 +11,7 @@ public sealed class TerminateInstanceEndpoint
         [FromRoute] int instanceId,
         [FromServices] AppDbContext dbContext,
         [FromServices] IDocumentStore documentStore,
+        [FromServices] ILogger<TerminateInstanceEndpoint> logger,
         CancellationToken ct)
     {
         var instance = dbContext
@@ -24,6 +25,17 @@ public sealed class TerminateInstanceEndpoint
 
         using (var session = documentStore.LightweightSession())
         {
+            var instanceAggregate = session
+                .Events
+                .AggregateStream<InstanceAggregate>(instance.EventStreamId)!;
+
+            logger.LogInformation("Instance state: {Aggregate}", instanceAggregate);
+
+            if (instanceAggregate.IsTerminated)
+            {
+                throw new Exception($"Instance with id '{instanceId}' was terminated!");
+            }
+
             var instanceEvent = new InstanceTerminatedEvent()
             {
                 InstanceId = instanceId
