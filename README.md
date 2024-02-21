@@ -1,4 +1,10 @@
-# Event Sourcing demo app
+# Event Sourcing with multi-tenancy
+
+Main idea:
+
+- Each request contains an information which identifies the tenant.
+- `TenantContextProvider` holds information about current tenant.
+- Each request must be processed in the database specified by `TenantContextProvider.Current.Databasa`.
 
 ## Setup
 

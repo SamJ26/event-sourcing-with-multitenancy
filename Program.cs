@@ -19,6 +19,8 @@ public static class Program
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
+            services.AddTransient<MultiTenancyMiddleware>();
+
             services.AddScoped<TenantContextProvider>();
 
             var connectionString = configuration.GetConnectionString("Default")!;
@@ -47,6 +49,8 @@ public static class Program
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseMiddleware<MultiTenancyMiddleware>();
 
             var group = app
                 .MapGroup("instances")
