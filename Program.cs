@@ -1,8 +1,8 @@
-using EventSourcing.Endpoints;
+using EventSourcing.Extensions;
+using EventSourcing.MultiTenancy;
 using EventSourcing.Persistence;
+using EventSourcing.Persistence.Options;
 using Marten;
-using Marten.Storage;
-using Microsoft.EntityFrameworkCore;
 using Weasel.Core;
 
 namespace EventSourcing;
@@ -20,26 +20,11 @@ public static class Program
             services.AddSwaggerGen();
 
             services.AddTransient<MultiTenancyMiddleware>();
-
             services.AddScoped<TenantContextProvider>();
 
-            var connectionString = configuration.GetConnectionString("Default")!;
+            services.AddPersistence(configuration);
 
-            services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
-
-            services.AddMarten((options) =>
-            {
-                options.Connection(connectionString);
-
-                // If we're running in development mode, let Marten just take care of all necessary schema building and patching behind the scenes
-                if (builder.Environment.IsDevelopment())
-                {
-                    options.AutoCreateSchemaObjects = AutoCreate.All;
-                }
-
-                // TODO: is this correct configuration?
-                options.Events.TenancyStyle = TenancyStyle.Conjoined;
-            });
+            ConfigureMarten(services, configuration);
         }
 
         var app = builder.Build();
@@ -52,17 +37,35 @@ public static class Program
 
             app.UseMiddleware<MultiTenancyMiddleware>();
 
-            var group = app
-                .MapGroup("instances")
-                .WithTags("Instances");
-
-            group.MapPost(string.Empty, StartInstanceEndpoint.Handle);
-
-            group.MapPut("{instanceId:int}/submit-answer", SubmitAnswerEndpoint.Handle);
-
-            group.MapPut("{instanceId:int}/terminate", TerminateInstanceEndpoint.Handle);
+            app.UseTenantsModule();
+            app.UseGamesModule();
         }
 
         app.Run();
+    }
+
+    private static void ConfigureMarten(IServiceCollection services, IConfiguration configuration)
+    {
+        var databaseOptions = configuration
+            .GetSection("Persistence:DatabaseOptions")
+            .Get<DatabaseOptions>()!;
+
+        var connectionStringOptions = configuration
+            .GetSection("Persistence:ConnectionStringOptions")
+            .Get<ConnectionStringOptions>()!;
+
+        var connectionString = $"Host={connectionStringOptions.Host};" +
+                               $"Port={connectionStringOptions.Port};" +
+                               $"Database={databaseOptions.MasterDatabaseName};" +
+                               $"Username={connectionStringOptions.Username};" +
+                               $"Password={connectionStringOptions.Password}";
+
+        services
+            .AddMarten((options) =>
+            {
+                options.MultiTenantedDatabasesWithMasterDatabaseTable(connectionString);
+                options.AutoCreateSchemaObjects = AutoCreate.All;
+            })
+            .ApplyAllDatabaseChangesOnStartup();
     }
 }

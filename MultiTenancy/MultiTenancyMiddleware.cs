@@ -1,4 +1,4 @@
-namespace EventSourcing;
+namespace EventSourcing.MultiTenancy;
 
 public sealed class MultiTenancyMiddleware(TenantContextProvider tenantContextProvider) : IMiddleware
 {
@@ -6,6 +6,10 @@ public sealed class MultiTenancyMiddleware(TenantContextProvider tenantContextPr
 
     public async Task InvokeAsync(HttpContext httpContext, RequestDelegate next)
     {
+        var tenantIdentifier = httpContext
+            .Request
+            .Headers["Tenant"];
+
         // Tenant identifier from HTTP request would be passed into this method
         _tenantContextProvider.Initialize();
 

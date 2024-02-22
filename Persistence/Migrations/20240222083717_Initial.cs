@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace EventSourcing.Migrations
+namespace EventSourcing.Persistence.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration
@@ -13,7 +13,7 @@ namespace EventSourcing.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Instances",
+                name: "Games",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -22,7 +22,7 @@ namespace EventSourcing.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Instances", x => x.Id);
+                    table.PrimaryKey("PK_Games", x => x.Id);
                 });
         }
 
@@ -30,7 +30,7 @@ namespace EventSourcing.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Instances");
+                name: "Games");
         }
     }
 }

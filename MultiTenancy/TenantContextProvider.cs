@@ -1,4 +1,4 @@
-namespace EventSourcing;
+namespace EventSourcing.MultiTenancy;
 
 public sealed class TenantContextProvider
 {

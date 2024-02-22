@@ -1,6 +1,6 @@
 namespace EventSourcing.Events;
 
-public sealed class AnswerSubmittedEvent : EventBase
+public sealed class GameAnswerSubmittedEvent : EventBase
 {
     public required string Text { get; init; }
 }

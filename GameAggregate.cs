@@ -2,23 +2,23 @@ using EventSourcing.Events;
 
 namespace EventSourcing;
 
-public sealed class InstanceAggregate
+public sealed class GameAggregate
 {
     public int Id { get; private set; }
     public bool IsTerminated { get; private set; }
     public string Answer { get; private set; } = null!;
 
-    public void Apply(InstanceStartedEvent e)
+    public void Apply(GameStartedEvent e)
     {
-        Id = e.InstanceId;
+        Id = e.GameId;
     }
 
-    public void Apply(AnswerSubmittedEvent e)
+    public void Apply(GameAnswerSubmittedEvent e)
     {
         Answer = e.Text;
     }
 
-    public void Apply(InstanceTerminatedEvent _)
+    public void Apply(GameTerminatedEvent _)
     {
         IsTerminated = true;
     }
