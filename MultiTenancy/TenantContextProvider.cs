@@ -4,13 +4,10 @@ public sealed class TenantContextProvider
 {
     public TenantContext? Current { get; private set; }
 
-    public void Initialize()
+    public void Initialize(string tenantIdentifier)
     {
-        // In real application, this value would not be hardcoded
-        Current = new TenantContext("Google", "tenant_google");
+        Current = new TenantContext(tenantIdentifier);
     }
 }
 
-public record TenantContext(
-    string Name,
-    string Database);
+public record TenantContext(string Identifier);

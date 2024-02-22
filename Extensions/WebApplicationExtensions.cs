@@ -1,3 +1,4 @@
+using EventSourcing.Endpoints.Games;
 using EventSourcing.Endpoints.Tenants;
 
 namespace EventSourcing.Extensions;
@@ -10,9 +11,9 @@ public static class WebApplicationExtensions
             .MapGroup("games")
             .WithTags("Games");
 
-        // group.MapPost(string.Empty, StartInstanceEndpoint.Handle);
+        group.MapPost(string.Empty, StartGameEndpoint.Handle);
         // group.MapPut("{instanceId:int}/submit-answer", SubmitAnswerEndpoint.Handle);
-        // group.MapPut("{instanceId:int}/terminate", TerminateInstanceEndpoint.Handle);
+        // group.MapPut("{instanceId:int}/terminate", TerminateGameEndpoint.Handle);
     }
 
     public static void UseTenantsModule(this WebApplication app)

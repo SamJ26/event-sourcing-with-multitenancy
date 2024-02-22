@@ -1,4 +1,5 @@
 // using EventSourcing.Events;
+// using EventSourcing.MultiTenancy;
 // using EventSourcing.Persistence;
 // using Marten;
 // using Microsoft.AspNetCore.Mvc;
@@ -10,7 +11,6 @@
 //     public static IResult Handle(
 //         [FromRoute] int instanceId,
 //         [FromBody] SubmitAnswerRequest req,
-//         [FromServices] TenantDbContext dbContext,
 //         [FromServices] IDocumentStore documentStore,
 //         [FromServices] TenantContextProvider tenantContextProvider,
 //         [FromServices] ILogger<SubmitAnswerEndpoint> logger,
@@ -18,8 +18,8 @@
 //     {
 //         var tenant = tenantContextProvider.Current;
 //         
-//         var instance = dbContext
-//             .Instances
+//         var game = dbContext
+//             .Games
 //             .Find(instanceId);
 //
 //         if (instance is null)

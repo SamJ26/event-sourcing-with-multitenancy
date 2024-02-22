@@ -8,10 +8,9 @@ public sealed class MultiTenancyMiddleware(TenantContextProvider tenantContextPr
     {
         var tenantIdentifier = httpContext
             .Request
-            .Headers["Tenant"];
+            .Query["tenant"];
 
-        // Tenant identifier from HTTP request would be passed into this method
-        _tenantContextProvider.Initialize();
+        _tenantContextProvider.Initialize(tenantIdentifier!);
 
         await next(httpContext);
     }
